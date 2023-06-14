@@ -2,24 +2,69 @@
 #include <cmath>
 #include "src/include/vectornd.h"
 #include "src/include/particle.h"
+#include "src/include/utils.h"
 
 
+
+
+class Environment {
+    public:
+        float width;
+        int nparticles;
+        LJParticle *particles;
+        float **forces;
+
+        Environment(float init_width, int init_nparticles) : 
+            width(init_width), 
+            nparticles(init_nparticles) 
+            {
+            particles = new LJParticle[nparticles];
+
+            for (int i = 0; i < nparticles; i++) {
+                // set all positions and velocities zo zero
+                particles[i].init_pos(new Vector2d(0, 0));
+                particles[i].init_vel(new Vector2d(0, 0));
+            }
+
+            forces = new float*[nparticles];
+            for (int i = 0; i < nparticles; i++){
+                forces[i] = new float[nparticles];
+                for (int j = 0; j < nparticles; j++){
+                    // set all force vals to zero
+                    forces[i][j] = 0;
+                }
+            }
+        }
+
+        void init_random() {
+            for (int i = 0; i < nparticles; i++){
+                particles[i].mod_pos(new Vector2d(utils::randUniform(0, width), utils::randUniform(0, width)));
+                particles[i].mod_vel(new Vector2d(utils::randUniform(-1, 1), utils::randUniform(-1, 1)));
+            }
+        }
+};
 
 
 int main(){
-    Vector2d *vec1 = new Vector2d(69, 69);
-    Vector2d *vec2 = new Vector2d(420, 420);
-    vec1->printVector();
-    vec2->printVector();
-    std::cout << vec1->dist_to(*vec2) << '\n';
+    int nparticles = 100;
+    float width = 100;
 
-    LJParticle* lj1 = new LJParticle(0.2, 2.2);
-    lj1->init_pos(new Vector2d(0,0));
-    lj1->init_vel(new Vector2d(0,0));
-    lj1->printRV();
+    Environment env(nparticles, width);
 
-    lj1->mod_pos(vec1);
-    lj1->mod_vel(vec2);
-    lj1->printRV();
+    //env.particles[0].printRV();
+    env.init_random();
+    //for (int i = 0; i<100;i++){
+    //    env.particles[i].printRV();
+    //}
+    //std::cout << env.forces[0][1];
+
+    for (int i = 1; i<nparticles;i++){
+        float dist = env.particles[0].getPos().dist_to(env.particles[i].getPos());
+        float f_i = utils::ljPot(env.particles[0].sigma, env.particles[0].eps, dist);
+        std::cout << f_i << '\n';
+
+    };
+
+    //env.particles[0].getPos().printVector(); 
 
 };

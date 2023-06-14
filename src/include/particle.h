@@ -38,6 +38,15 @@ class Particle {
         vel->y = new_vel->y;
     }
 
+    Vector2d getPos(){
+        return *pos;
+    }
+
+    Vector2d getVel(){
+        return *vel;
+    }
+
+
     void printRV(){
         std::cout << '\n';
         std::cout << "r: ";
@@ -55,6 +64,10 @@ class LJParticle : public Particle {
         const float sigma;
 
         LJParticle(float init_eps, float init_sigma) : eps(init_eps), sigma(init_sigma) {
+
+        }
+
+        LJParticle() : eps(1), sigma(1) {
 
         }
 };

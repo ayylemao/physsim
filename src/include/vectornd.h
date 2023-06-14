@@ -38,6 +38,24 @@ class Vector2d {
             std::cout << ']';
             std::cout << '\n'; 
         }
+
+        static float getNorm(Vector2d vec) {
+            float norm = std::sqrt(std::pow(vec.x, 2) + std::pow(vec.y, 2));
+            return norm;
+        }
+
+        Vector2d getUnitDistAx(Vector2d vec2) {
+            Vector2d tempvec(0, 0);
+            tempvec.x = vec2.x - x;
+            tempvec.y = vec2.y - y;
+            std::cout << x << ' ' << y << '\n';
+            std::cout << vec2.x << ' ' << vec2.y << '\n';
+            std::cout << tempvec.x << ' ' << tempvec.y << '\n';
+            float norm = getNorm(tempvec);
+            tempvec.x = tempvec.x / norm;
+            tempvec.y = tempvec.y / norm;
+            return tempvec;
+        }
 };
 
 class Vector3d {
