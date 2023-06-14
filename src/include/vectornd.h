@@ -1,17 +1,44 @@
+#ifndef VECTORND_H
+#define VECTORND_H
+
 #include <iostream>
 #include <cmath>
 
-//typedef std::vector<float, > vector3d;
+class Vector2d {
+    public:
+        float x;
+        float y;
+        float* comp[2];
 
-/*
-class Environment {
-    private:
-        float height;
-        float width;
-        int nparticles;
-        std::vector<std::vector<
+        Vector2d(float init_x, float init_y) {
+            x = init_x;
+            y = init_y;
+            comp[0] = &x;
+            comp[1] = &y;
+        }
+
+        void add_vec(Vector2d vec2){
+            for (int i = 0; i < 2; i++) {
+                *(comp[i]) += *(vec2.comp[i]);
+            }
+        }
+
+        float dist_to(Vector2d vec2){
+            float dist = 0;
+            for (int i = 0; i < 2; i++) {
+                dist += std::pow(*(comp[i]) - *(vec2.comp[i]), 2);
+            }
+            dist = std::sqrt(dist);
+            return dist;
+        }
+
+        void printVector(){
+            std::cout << '[';
+            std::cout << x << ", " << y;
+            std::cout << ']';
+            std::cout << '\n'; 
+        }
 };
-*/
 
 class Vector3d {
     public:
@@ -50,17 +77,6 @@ class Vector3d {
             std::cout << ']';
             std::cout << '\n'; 
         }
-
-
-
 };
 
-int main(){
-    Vector3d *vec1 = new Vector3d(0, 0, 0);
-    Vector3d *vec2 = new Vector3d(1, 0, 1);
-    vec1->printVector();
-//    vec1->add_vec(*vec2);
-    vec2->printVector();
-    std::cout << vec1->dist_to(*vec2) << '\n';
-
-};
+#endif
