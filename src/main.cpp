@@ -38,7 +38,7 @@ class Environment {
         void init_random() {
             for (int i = 0; i < nparticles; i++){
                 particles[i].mod_pos(new Vector2d(utils::randUniform(0, width), utils::randUniform(0, width)));
-                particles[i].mod_vel(new Vector2d(utils::randUniform(-5, 5), utils::randUniform(-5, 5)));
+                particles[i].mod_vel(new Vector2d(utils::randUniform(-1, 1), utils::randUniform(-1, 1)));
             }
         }
 
@@ -53,6 +53,17 @@ class Environment {
                         unitVec.scalarMult(f_ij);
                         forces[i].add_vec(unitVec);
                     }
+                }
+            }
+        }
+
+        void enforceWalls(){
+            for (int i = 0; i < nparticles; i++){
+                if (particles[i].getPos().y <= 0 || particles[i].getPos().y >= width) {
+                    particles[i].reflectYvel();
+                }
+                if (particles[i].getPos().x <= 0 || particles[i].getPos().x >= width) {
+                    particles[i].reflectXvel();
                 }
             }
         }
@@ -118,7 +129,7 @@ int main(){
     sf::RenderWindow window(sf::VideoMode(width, width), "My window");
     sf::CircleShape shape(1.f);
     shape.setFillColor(sf::Color(255, 255, 255));
-
+    int i = 0;
     // run the program as long as the window is open
     while (window.isOpen())
     {
@@ -141,6 +152,11 @@ int main(){
 
         env.calculateForces();
         env.IntegrateEuler();
+        env.enforceWalls();
+        //std::cout << i << '\n';
+        env.particles[10].getPos().printVector();
+
+        i += 1;
     }
 
 };

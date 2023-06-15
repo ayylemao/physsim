@@ -47,6 +47,14 @@ class Particle {
         return *vel;
     }
 
+    void reflectXvel(){
+        vel->x = -vel->x;
+    }
+
+    void reflectYvel(){
+        vel->y = -vel->y;
+    }
+
     float getMass(){
         return mass;
     }
@@ -72,7 +80,7 @@ class LJParticle : public Particle {
 
         }
 
-        LJParticle() : eps(2), sigma(5) {
+        LJParticle() : eps(1), sigma(1) {
 
         }
 };
