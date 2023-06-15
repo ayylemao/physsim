@@ -2,9 +2,9 @@
 #include <cstdio>
 #include <cmath>
 #include <cstring>
-#include "src/include/vectornd.h"
-#include "src/include/particle.h"
-#include "src/include/utils.h"
+#include "include/vectornd.h"
+#include "include/particle.h"
+#include "include/utils.h"
 #include <SFML/Graphics.hpp>
 
 
@@ -38,7 +38,7 @@ class Environment {
         void init_random() {
             for (int i = 0; i < nparticles; i++){
                 particles[i].mod_pos(new Vector2d(utils::randUniform(0, width), utils::randUniform(0, width)));
-                particles[i].mod_vel(new Vector2d(utils::randUniform(-1, 1), utils::randUniform(-1, 1)));
+                particles[i].mod_vel(new Vector2d(utils::randUniform(-5, 5), utils::randUniform(-5, 5)));
             }
         }
 
@@ -83,18 +83,64 @@ class Environment {
         }
 };
 
+void drawParticles(sf::RenderWindow& window, Environment* env, const float CIRCLE_RADIUS)
+{
+    sf::CircleShape circle(CIRCLE_RADIUS);
+    circle.setFillColor(sf::Color::Red); // Set the desired circle color
+
+    for (int i = 0; i < env->nparticles; i++)
+    {
+        // Get the particle position
+        Vector2d pos = env->particles[i].getPos();
+
+        // Set the circle position
+        circle.setPosition(pos.x, pos.y);
+
+        // Draw the circle
+        window.draw(circle);
+    }
+}
+
 
 int main(){
+    const float CIRCLE_RADIUS = 3.0;
     int nparticles = 1000;
-    float width = 100;
+    float width = 500;
     float dt = 0.01;
 
     Environment env(width, nparticles, dt);
     env.init_random();
 
-    for (int i = 0; i<1000; i++){
-        env.IntegrateEuler(); 
-        env.particles[0].printRV();
-    } 
+    //for (int i = 0; i<1000; i++){
+    //    env.IntegrateEuler(); 
+    //    env.particles[1].printRV();
+    //} 
+    sf::RenderWindow window(sf::VideoMode(width, width), "My window");
+    sf::CircleShape shape(1.f);
+    shape.setFillColor(sf::Color(255, 255, 255));
+
+    // run the program as long as the window is open
+    while (window.isOpen())
+    {
+        // check all the window's events that were triggered since the last iteration of the loop
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            // "close requested" event: we close the window
+            if (event.type == sf::Event::Closed)
+                window.close();
+        }
+
+        // clear the window with black color
+        window.clear(sf::Color::Black);
+
+        // draw everything here...
+        drawParticles(window, &env, CIRCLE_RADIUS);
+        // end the current frame
+        window.display();
+
+        env.calculateForces();
+        env.IntegrateEuler();
+    }
 
 };

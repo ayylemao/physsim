@@ -72,7 +72,7 @@ class LJParticle : public Particle {
 
         }
 
-        LJParticle() : eps(1), sigma(1) {
+        LJParticle() : eps(2), sigma(5) {
 
         }
 };

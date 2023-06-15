@@ -1,3 +1,4 @@
 *.out
 *.o
 bin
+old_stuff
