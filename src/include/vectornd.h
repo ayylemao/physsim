@@ -17,10 +17,13 @@ class Vector2d {
             comp[1] = &y;
         }
 
+        Vector2d() : x(0), y(0){
+            //pass
+        }
+
         void add_vec(Vector2d vec2){
-            for (int i = 0; i < 2; i++) {
-                *(comp[i]) += *(vec2.comp[i]);
-            }
+            x += vec2.x;
+            y += vec2.y;
         }
 
         float dist_to(Vector2d vec2){
@@ -30,6 +33,11 @@ class Vector2d {
             }
             dist = std::sqrt(dist);
             return dist;
+        }
+
+        void scalarMult(float multi){
+            x = x*multi;
+            y = y*multi;
         }
 
         void printVector(){
@@ -48,9 +56,6 @@ class Vector2d {
             Vector2d tempvec(0, 0);
             tempvec.x = vec2.x - x;
             tempvec.y = vec2.y - y;
-            std::cout << x << ' ' << y << '\n';
-            std::cout << vec2.x << ' ' << vec2.y << '\n';
-            std::cout << tempvec.x << ' ' << tempvec.y << '\n';
             float norm = getNorm(tempvec);
             tempvec.x = tempvec.x / norm;
             tempvec.y = tempvec.y / norm;

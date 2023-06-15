@@ -10,9 +10,10 @@ class Particle {
     protected:
         Vector2d* pos;
         Vector2d* vel;
+        float mass;
 
     public:
-        Particle() {
+        Particle(float init_mass = 1) : mass(init_mass) {
         }
         
         ~Particle() {
@@ -44,6 +45,10 @@ class Particle {
 
     Vector2d getVel(){
         return *vel;
+    }
+
+    float getMass(){
+        return mass;
     }
 
 

@@ -4,12 +4,16 @@ CFLAGS := -Wall -Wextra -pedantic -std=c++17
 
 # Directories
 SRC_DIR := src
+INCLUDE_DIR := src/include
 BUILD_DIR := build
 BIN_DIR := bin
 
 # Source files
 SOURCES := $(wildcard $(SRC_DIR)/*.cpp)
 OBJECTS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SOURCES))
+
+# Include directories
+INCLUDES := -I$(INCLUDE_DIR)
 
 # Executable
 EXECUTABLE := $(BIN_DIR)/sim
@@ -23,7 +27,7 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ -o $@ $(SFML_LIBS)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
 	rm -rf $(BUILD_DIR)/* $(BIN_DIR)/*
