@@ -5,59 +5,59 @@
 #include "include/vectornd.h"
 #include "include/particle.h"
 #include "include/utils.h"
+#include "include/environment.h"
 #include <SFML/Graphics.hpp>
 
 
+void drawParticles(sf::RenderWindow& window, Environment *env, double CIRCLE_RADIUS)
+{
+    sf::CircleShape circle(CIRCLE_RADIUS);
+    circle.setFillColor(sf::Color::Red); // Set the desired circle color
 
+    for (int i = 0; i < env->nparticles; i++)
+    {
 
-class Environment {
-    public:
-        int nparticles;
-        double boxsize;
-        double dt;
-        Particle* particles;
+        // Set the circle position
+        circle.setPosition(env->particles[i].pos.x, env->particles[i].pos.y);
 
-
-        Environment(int numParticles, float in_boxsize, float timestep) : nparticles(numParticles), boxsize(in_boxsize), dt(timestep)
-        {
-            particles = new Particle[numParticles];
-        };
-
-        void initialize_particles(){
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::normal_distribution<double> normal(0.0, 1.0);
-            std::uniform_real_distribution<double> uniform(0.0, boxsize);
-            double vx;
-            double vy;
-            double x;
-            double y;
-            for (int i; i < nparticles; i++){
-                vx = normal(gen);
-                vy = normal(gen);
-                x = uniform(gen);
-                y = uniform(gen);
-                particles[i].vel.x = vx;
-                particles[i].vel.y = vy;
-                particles[i].pos.x = x;
-                particles[i].pos.y = y;
-            }
-        }
-        ~Environment(){
-            delete[] particles;
-        }
-};
-
+        // Draw the circle
+        window.draw(circle);
+    }
+}
 
 int main(){
-    int nparticles = 100;
-    double boxsize = 100;
-    double dt = 0.01;
+    int nparticles = 484;
+    double boxsize = 500;
+    double dt = 0.001;
+    double inelasticity = 0.1;
+    double CIRCLE_RADIUS = 3.0;
 
-    Environment env(nparticles, boxsize, dt);
+    auto env = Environment(nparticles, boxsize, dt, inelasticity);
+    for (int i = 0; i < nparticles; i++){
+        env.particles[i].setParams(1, 3, 100);
+    }
     env.initialize_particles();
-    env.particles[0].pos.print();
+    sf::RenderWindow window(sf::VideoMode(boxsize, boxsize), "LJ SIM");
+    while (window.isOpen())
+    {
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+                window.close();
+        }
+
+
+        env.calcDistances();
+        env.calcForces();
+        env.integrateEuler();
+        env.enforceBoundary();
+
+        window.clear(); 
+        drawParticles(window, &env, CIRCLE_RADIUS);
+
+        window.display();
+    }
 
     return 0;
-
-};
+}

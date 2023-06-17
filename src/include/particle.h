@@ -10,8 +10,8 @@ class Particle {
     public:
         Vector2d pos;
         Vector2d vel;
-        float eps = 1;
-        float sig = 1;
+        float eps = 5;
+        float sig = 5;
         float mass = 1;
 
     Particle(double x = 0, double y = 0, double vx = 0, double vy = 0) : pos(x, y), vel(vx, vy)

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Build the program using the Makefile
+make clean
 make
 
 # Check if the build was successful

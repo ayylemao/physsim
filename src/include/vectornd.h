@@ -24,10 +24,29 @@ class Vector2d {
             return *this;
         }
 
+        Vector2d& operator -=(const Vector2d& other) {
+            x -= other.x;
+            y -= other.y;
+            return *this;
+        }
+
         Vector2d& operator *=(const float mult) {
             x = x*mult;
             y = y*mult; 
             return *this;
+        }
+
+        Vector2d dist_vec(const Vector2d& other){
+            double x_dist = other.x - x;
+            double y_dist = other.y - y;
+            return Vector2d(x_dist, y_dist);
+        }
+
+
+        double dist(const Vector2d& other){
+            double x_dist = x - other.x;
+            double y_dist = y - other.y;
+            return std::sqrt(x_dist*x_dist + y_dist*y_dist);
         }
 
 
