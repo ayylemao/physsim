@@ -7,82 +7,22 @@
 
 
 class Particle {
-    protected:
-        Vector2d* pos;
-        Vector2d* vel;
-        float mass;
-
     public:
-        Particle(float init_mass = 1) : mass(init_mass) {
-        }
-        
-        ~Particle() {
-            delete pos;
-            delete vel;
-        }
+        Vector2d pos;
+        Vector2d vel;
+        float eps = 1;
+        float sig = 1;
+        float mass = 1;
 
-    void init_pos(Vector2d* r_vec){
-        pos = r_vec;
+    Particle(double x = 0, double y = 0, double vx = 0, double vy = 0) : pos(x, y), vel(vx, vy)
+    {
+    };
+
+    void setParams(float epsilon, float sigma, float in_mass) {
+        eps = epsilon;
+        sig = sigma;
+        mass = in_mass;
     }
-
-    void init_vel(Vector2d* v_vec){
-        vel = v_vec;
-    }
-
-    void mod_pos(Vector2d* new_pos){
-        pos->x = new_pos->x;
-        pos->y = new_pos->y;
-    }
-
-    void mod_vel(Vector2d* new_vel){
-        vel->x = new_vel->x;
-        vel->y = new_vel->y;
-    }
-
-    Vector2d getPos(){
-        return *pos;
-    }
-
-    Vector2d getVel(){
-        return *vel;
-    }
-
-    void reflectXvel(){
-        vel->x = -vel->x;
-    }
-
-    void reflectYvel(){
-        vel->y = -vel->y;
-    }
-
-    float getMass(){
-        return mass;
-    }
-
-
-    void printRV(){
-        std::cout << '\n';
-        std::cout << "r: ";
-        pos->printVector();
-        std::cout << "v: ";
-        vel->printVector();
-        std::cout << '\n';
-    }
-};
-
-
-class LJParticle : public Particle {
-    public:
-        const float eps;
-        const float sigma;
-
-        LJParticle(float init_eps, float init_sigma) : eps(init_eps), sigma(init_sigma) {
-
-        }
-
-        LJParticle() : eps(1), sigma(1) {
-
-        }
 };
 
 #endif

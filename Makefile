@@ -1,6 +1,6 @@
 # Compiler
 CC := g++
-CFLAGS := -Wall -Wextra -pedantic -std=c++17
+CFLAGS := -Wall -Wextra -pedantic -std=c++17 -pg
 
 # Directories
 SRC_DIR := src
