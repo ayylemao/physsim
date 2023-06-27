@@ -16,7 +16,12 @@ void drawParticles(sf::RenderWindow& window, Environment *env, double CIRCLE_RAD
     for (int i = 0; i < env->nparticles; i++)
     {
         forcemag = env->forces[i].magnitude();
-        circle.setFillColor(sf::Color(255, forcemag, forcemag)); // Set the desired circle color
+        if (i == 0){
+            circle.setFillColor(sf::Color(forcemag, forcemag, 255)); // Set the desired circle color
+        }
+        else {
+            circle.setFillColor(sf::Color(255, forcemag, forcemag)); // Set the desired circle color
+        }
         // Set the circle position
         circle.setPosition(env->particles[i].pos.x, env->particles[i].pos.y);
 
@@ -55,6 +60,7 @@ int main(){
         //std::cout << env.energy << '\n';
         window.clear(); 
         drawParticles(window, &env, CIRCLE_RADIUS);
+        std::cout << env.forces[0].magnitude() << '\n';
 
         window.display();
     }
