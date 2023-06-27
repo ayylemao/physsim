@@ -36,6 +36,14 @@ class Vector2d {
             return *this;
         }
 
+        Vector2d& operator=(const Vector2d& other) {
+            if (this != &other) {
+                x = other.x;
+                y = other.y;
+            }
+        return *this;
+        }
+
         Vector2d dist_vec(const Vector2d& other){
             double x_dist = other.x - x;
             double y_dist = other.y - y;

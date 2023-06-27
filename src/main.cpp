@@ -26,17 +26,18 @@ void drawParticles(sf::RenderWindow& window, Environment *env, double CIRCLE_RAD
 }
 
 int main(){
-    int nparticles = 484;
+    int nparticles = 100;
     double boxsize = 500;
-    double dt = 0.001;
-    double inelasticity = 0.1;
+    double dt = 0.0001;
+    double inelasticity = 1.0;
     double CIRCLE_RADIUS = 3.0;
+    double VEL_SCALE = 1;
 
     auto env = Environment(nparticles, boxsize, dt, inelasticity);
     for (int i = 0; i < nparticles; i++){
-        env.particles[i].setParams(1, 3, 100);
+        env.particles[i].setParams(1, 20, 10);
     }
-    env.initialize_particles();
+    env.initialize_particles(VEL_SCALE);
     sf::RenderWindow window(sf::VideoMode(boxsize, boxsize), "LJ SIM");
     while (window.isOpen())
     {
@@ -48,11 +49,10 @@ int main(){
         }
 
 
-        env.calcDistances();
-        env.calcForces();
-        env.integrateEuler();
+        env.integrateVerlet();
+        //env.calcEnergy();
         env.enforceBoundary();
-
+        //std::cout << env.energy << '\n';
         window.clear(); 
         drawParticles(window, &env, CIRCLE_RADIUS);
 
