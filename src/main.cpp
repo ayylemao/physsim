@@ -12,11 +12,11 @@
 void drawParticles(sf::RenderWindow& window, Environment *env, double CIRCLE_RADIUS)
 {
     sf::CircleShape circle(CIRCLE_RADIUS);
-    circle.setFillColor(sf::Color::Red); // Set the desired circle color
-
+    double forcemag;
     for (int i = 0; i < env->nparticles; i++)
     {
-
+        forcemag = env->forces[i].magnitude();
+        circle.setFillColor(sf::Color(255, forcemag, forcemag)); // Set the desired circle color
         // Set the circle position
         circle.setPosition(env->particles[i].pos.x, env->particles[i].pos.y);
 
@@ -31,7 +31,7 @@ int main(){
     double dt = 0.0001;
     double inelasticity = 1.0;
     double CIRCLE_RADIUS = 3.0;
-    double VEL_SCALE = 1;
+    double VEL_SCALE = 10;
 
     auto env = Environment(nparticles, boxsize, dt, inelasticity);
     for (int i = 0; i < nparticles; i++){

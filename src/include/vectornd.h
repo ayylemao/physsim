@@ -57,6 +57,10 @@ class Vector2d {
             return std::sqrt(x_dist*x_dist + y_dist*y_dist);
         }
 
+        double magnitude(){
+            return std::sqrt(x*x + y*y);
+        }
+
 
         void getUnitAxis(const Vector2d& other, Vector2d& result){
             float x_dist = other.x - x;
