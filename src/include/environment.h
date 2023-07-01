@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstring>
 #include <random>
+#include <gsl/gsl_multimin.h>
 #include "vectornd.h"
 #include "particle.h"
 #include "utils.h"
@@ -15,6 +16,7 @@ class Environment {
         double inela;
         double **distances;
         double energy = 0;
+        bool pbc = true;
         Particle* particles;
         Vector2d* forces;
         Vector2d* forces_old;
@@ -80,6 +82,25 @@ class Environment {
             }
         }
 
+        void enforcePBC(){
+            for (int i = 0; i < nparticles; i++){
+                if (particles[i].pos.x < boxsize) {
+                    particles[i].pos.x = particles[i].pos.x + boxsize;
+                }
+                if (particles[i].pos.y < boxsize) {
+                    particles[i].pos.y = particles[i].pos.y + boxsize;
+                }
+                if (particles[i].pos.x > boxsize) {
+                    particles[i].pos.x = particles[i].pos.x - boxsize;
+                }
+                if (particles[i].pos.y > boxsize) {
+                    particles[i].pos.y = particles[i].pos.y - boxsize;
+                }
+                
+            }
+        }
+        
+
         void calcDistances(){
             for (int i = 0; i < nparticles; i++) {
                 for (int j = i; j < nparticles; j++) {
@@ -92,6 +113,24 @@ class Environment {
             }
         }
 
+        Vector2d calc_PBC_dist(const Vector2d& pos1, const Vector2d& pos2){
+            double dist_x = pos2.x - pos1.x;
+            double dist_y = pos2.y - pos1.y;
+
+            if (dist_x > boxsize * 0.5) {
+                dist_x -= boxsize;
+            } else if (dist_x < -boxsize * 0.5) {
+                dist_x += boxsize;
+            }
+
+            if (dist_y < -boxsize * 0.5) {
+                dist_y += boxsize;
+            } else if (dist_y > boxsize * 0.5) {
+                dist_y -= boxsize;
+            }
+            return Vector2d(dist_x, dist_y);
+        }
+
         void calcForces(){
             double inv_norm;
             double ind_force;
@@ -101,9 +140,9 @@ class Environment {
             for (int i = 0; i < nparticles; i++){
                 for (int j = i; j < nparticles; j++){
                     if (i != j){
-                        dist = particles[i].pos.dist(particles[j].pos);
+                        dist_vec = calc_PBC_dist(particles[i].pos, particles[j].pos);
+                        dist = dist_vec.magnitude();
                         inv_norm = 1.0f / dist;
-                        dist_vec = particles[i].pos.dist_vec(particles[j].pos);
                         ind_force = utils::ljFor(particles[i].eps, particles[i].sig, dist);
                         dist_vec *= inv_norm;
                         dist_vec *= ind_force;
@@ -152,7 +191,8 @@ class Environment {
             }
         }
 
-         ~Environment(){
+
+        ~Environment(){
             for (int i = 0; i < nparticles; i++){
                 delete[] distances[i];
             }
@@ -160,4 +200,5 @@ class Environment {
             delete[] particles;
             delete[] forces;
         }
+
 };
