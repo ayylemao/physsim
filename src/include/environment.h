@@ -1,9 +1,11 @@
+#ifndef ENVIRONMENT_H
+#define ENVIRONMENT_H
+
 #include <iostream>
 #include <cstdio>
 #include <cmath>
 #include <cstring>
 #include <random>
-#include <gsl/gsl_multimin.h>
 #include "vectornd.h"
 #include "particle.h"
 #include "utils.h"
@@ -56,6 +58,21 @@ class Environment {
                 particles[i].vel.y = vy;
                 particles[i].pos.x = x;
                 particles[i].pos.y = y;
+            }
+        }
+
+        void init_pos_uniform() {
+            int index = 0;
+            int sidelength = std::ceil(std::sqrt(nparticles));
+            double spacing = boxsize / sidelength;
+            for (int i = 0; i < sidelength; i++){
+                for (int j = 0; j < sidelength; j++){
+                    if (index < nparticles){
+                        particles[index].pos.x = (i + 0.5) * spacing;
+                        particles[index].pos.y = (j + 0.5) * spacing;
+                        index++;
+                    }
+                }
             }
         }
 
@@ -191,7 +208,6 @@ class Environment {
             }
         }
 
-
         ~Environment(){
             for (int i = 0; i < nparticles; i++){
                 delete[] distances[i];
@@ -202,3 +218,4 @@ class Environment {
         }
 
 };
+#endif

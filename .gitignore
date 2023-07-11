@@ -3,3 +3,5 @@
 bin
 old_stuff
 *.dat
+.vscode
+*.txt

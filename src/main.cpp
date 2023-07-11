@@ -44,20 +44,9 @@ int main(){
         env.particles[i].setParams(20, 17, 10);
     }
     env.initialize_particles(VEL_SCALE);
+    env.init_pos_uniform();
 
     // set position to equally spaced
-    int index = 0;
-    int sidelength = std::ceil(std::sqrt(nparticles));
-    double spacing = boxsize / sidelength;
-    for (int i = 0; i < sidelength; i++){
-        for (int j = 0; j < sidelength; j++){
-            if (index < nparticles){
-                env.particles[index].pos.x = (i + 0.5) * spacing;
-                env.particles[index].pos.y = (j + 0.5) * spacing;
-                index++;
-            }
-        }
-    }
 
 
     sf::RenderWindow window(sf::VideoMode(boxsize, boxsize), "LJ SIM");
