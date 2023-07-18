@@ -43,23 +43,24 @@ class GradientDescent {
             env->enforcePBC();
 
             grad[i+1] = (e_plus - e_minus) / (2 * h);
-            std::cout << i << '\n';
         }
 
     }
 
-    void steepest_descent(double step_size, int nsteps, double tol){
+    void steepest_descent(double step_size, int maxsteps, double tol){
         double dE = 1000;
-        while (dE > tol){
+        int n = 0;
+        while ((dE > tol) | (n >= maxsteps)){
             dE = env->calcPotEnergy();
             calc_grad();
             for (int i = 0; i<env->nparticles; i++){
                 env->particles[i].pos.x = env->particles[i].pos.x - grad[i]*step_size;
-                env->particles[i].pos.y = env->particles[i].pos.y - grad[i]*step_size;
+                env->particles[i].pos.y = env->particles[i].pos.y - grad[i+1]*step_size;
             }
             dE = std::abs(dE - env->calcPotEnergy());
 
             printf("delta E: %.5lf ==== System Energy: %.5lf\n", dE, env->calcPotEnergy());
+            n += 1;
 
         }
     }
