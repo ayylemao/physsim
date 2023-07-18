@@ -183,6 +183,19 @@ class Environment {
             }
         }
 
+         double calcPotEnergy(){
+            double potenergy = 0;
+            double dist = 0;
+            for (int i = 0; i < nparticles; i++){
+                for (int j = i; j < nparticles; j++){
+                    if (i != j){
+                        dist = calc_PBC_dist(particles[i].pos, particles[j].pos).magnitude();
+                        potenergy += 2*utils::ljPot(particles[i].eps, particles[i].sig, dist);
+                    }
+                }
+            }
+            return potenergy;
+        }
 
         void integrateVerlet(){
             auto accel0 = Vector2d(0, 0);

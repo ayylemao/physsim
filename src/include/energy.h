@@ -1,38 +1,70 @@
 #ifndef ENERGY_H
 #define ENERGY_H
 
-#include <ctime>
-#include "DifferentialEvolution.h"
 #include "environment.h"
 
-class PotEnergy : public de::IOptimizable
-{
-public:
-    double EvaluteCost(std::vector<double> inputs) const override
+class GradientDescent {
+    public:
+        Environment* env;
+        double* grad;
+        double h;
+
+    GradientDescent(Environment* env_in, double h_in)
+    : env(env_in), h(h_in) 
     {
-        assert(inputs.size() == 2);
-
-        double x = inputs[0];
-        double y = inputs[1];
-
-        return x * x + 2 * x * y + 3 * y * y;
+        grad = new double[2*(env->nparticles)];
+        std::fill(grad, grad + 2*(env->nparticles), 0);
     }
 
-    unsigned int NumberOfParameters() const override
-    {
-        return 2;
-    }
+    void calc_grad() {
+        double e_plus;
+        double e_minus;
+        env->calcDistances();
+        for (int i = 0; i<env->nparticles; i++){
+            // x_n dir
+            env->particles[i].pos.x = env->particles[i].pos.x + h;
+            env->enforcePBC();
+            e_plus = env->calcPotEnergy();
+            env->particles[i].pos.x = env->particles[i].pos.x - 2*h;
+            env->enforcePBC();
+            e_minus = env->calcPotEnergy();
+            env->particles[i].pos.x = env->particles[i].pos.x + h;
+            env->enforcePBC();
 
-    std::vector<Constraints> GetConstraints() const override
-    {
-        std::vector<Constraints> constr(NumberOfParameters());
-        for (auto& c : constr)
-        {
-            c = Constraints(-100.0, 100.0, true);
+            grad[i] = (e_plus - e_minus) / (2 * h);
+
+            env->particles[i].pos.y = env->particles[i].pos.y + h;
+            env->enforcePBC();
+            e_plus = env->calcPotEnergy();
+            env->particles[i].pos.y = env->particles[i].pos.y - 2*h;
+            env->enforcePBC();
+            e_minus = env->calcPotEnergy();
+            env->particles[i].pos.y = env->particles[i].pos.y + h;
+            env->enforcePBC();
+
+            grad[i+1] = (e_plus - e_minus) / (2 * h);
+            std::cout << i << '\n';
         }
-        return constr;
+
     }
+
+    void steepest_descent(double step_size, int nsteps, double tol){
+        double dE = 1000;
+        while (dE > tol){
+            dE = env->calcPotEnergy();
+            calc_grad();
+            for (int i = 0; i<env->nparticles; i++){
+                env->particles[i].pos.x = env->particles[i].pos.x - grad[i]*step_size;
+                env->particles[i].pos.y = env->particles[i].pos.y - grad[i]*step_size;
+            }
+            dE = std::abs(dE - env->calcPotEnergy());
+
+            printf("delta E: %.5lf ==== System Energy: %.5lf\n", dE, env->calcPotEnergy());
+
+        }
+    }
+
+
+
 };
-
-
 #endif
