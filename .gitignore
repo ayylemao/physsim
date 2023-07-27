@@ -5,3 +5,5 @@ old_stuff
 *.dat
 .vscode
 *.txt
+build/
+vcpkg_installed/

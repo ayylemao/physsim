@@ -6,26 +6,39 @@
 #include <cmath>
 #include <cstring>
 #include <random>
+#include <unordered_map>
+#include <vector>
 #include "vectornd.h"
 #include "particle.h"
 #include "utils.h"
+
+using Cell = std::vector<int>;
 
 class Environment {
     public:
         int nparticles;
         double boxsize;
         double dt;
-        double inela;
+        double inela = 1.0;
         double **distances;
         double energy = 0;
         bool pbc = true;
+        double cell_size;
+        int ncells;
+        bool **nneighbour;
+        std::unordered_map<int, Cell> spatial_grid;
         Particle* particles;
         Vector2d* forces;
         Vector2d* forces_old;
 
 
-        Environment(int numParticles, float in_boxsize, float timestep, float inelasticity) 
-        : nparticles(numParticles), boxsize(in_boxsize), dt(timestep), inela(inelasticity)
+        Environment(
+            int numParticles,
+            float in_boxsize,
+            float timestep,
+            float lj_cutoff) 
+        : 
+            nparticles(numParticles), boxsize(in_boxsize), dt(timestep), cell_size(lj_cutoff)
         {
             particles = new Particle[numParticles];
             distances = new double*[nparticles];
@@ -38,6 +51,20 @@ class Environment {
                 distances[i] = new double[nparticles];
                 std::fill(distances[i], distances[i] + nparticles, 0.0);
             }
+
+            // cell division scheme
+            ncells = boxsize / cell_size;
+            nneighbour = new bool*[nparticles];
+            for (int i = 0; i < nparticles; i++){
+                nneighbour[i] = new bool[nparticles];
+            }
+            for (int i = 0; i < nparticles; i++) {
+                for (int j = 0; j < nparticles; j++) {
+                    nneighbour[i][j] = false;
+                }
+            }
+
+
         }
 
         void initialize_particles(double vel_scale){
@@ -104,14 +131,14 @@ class Environment {
                 if (particles[i].pos.x < boxsize) {
                     particles[i].pos.x = particles[i].pos.x + boxsize;
                 }
-                if (particles[i].pos.y < boxsize) {
-                    particles[i].pos.y = particles[i].pos.y + boxsize;
-                }
-                if (particles[i].pos.x > boxsize) {
+                else if (particles[i].pos.x > boxsize) {
                     particles[i].pos.x = particles[i].pos.x - boxsize;
                 }
                 if (particles[i].pos.y > boxsize) {
                     particles[i].pos.y = particles[i].pos.y - boxsize;
+                }
+                else if (particles[i].pos.y < boxsize) {
+                    particles[i].pos.y = particles[i].pos.y + boxsize;
                 }
                 
             }
@@ -157,15 +184,17 @@ class Environment {
             for (int i = 0; i < nparticles; i++){
                 for (int j = i; j < nparticles; j++){
                     if (i != j){
-                        dist_vec = calc_PBC_dist(particles[i].pos, particles[j].pos);
-                        dist = dist_vec.magnitude();
-                        inv_norm = 1.0f / dist;
-                        ind_force = utils::ljFor(particles[i].eps, particles[i].sig, dist);
-                        dist_vec *= inv_norm;
-                        dist_vec *= ind_force;
-                        forces[i] += dist_vec;
-                        dist_vec *= -1;
-                        forces[j] += dist_vec;
+                        if (nneighbour[i][j] == true){
+                            dist_vec = calc_PBC_dist(particles[i].pos, particles[j].pos);
+                            dist = dist_vec.magnitude();
+                            inv_norm = 1.0f / dist;
+                            ind_force = utils::ljFor(particles[i].eps, particles[i].sig, dist);
+                            dist_vec *= inv_norm;
+                            dist_vec *= ind_force;
+                            forces[i] += dist_vec;
+                            dist_vec *= -1;
+                            forces[j] += dist_vec;
+                        }
                     }
                 }
             }
@@ -183,7 +212,7 @@ class Environment {
             }
         }
 
-         double calcPotEnergy(){
+        double calcPotEnergy(){
             double potenergy = 0;
             double dist = 0;
             for (int i = 0; i < nparticles; i++){
@@ -221,10 +250,94 @@ class Environment {
             }
         }
 
+        int calculateCellIndex(double x, double y) {
+            int cell_x = static_cast<int>(x / cell_size);
+            int cell_y = static_cast<int>(y / cell_size);
+            return cell_x + cell_y * ncells;
+        }
+
+        void assing_cells(){
+            for (int i = 0; i<nparticles; i++){
+                int cell_index = calculateCellIndex(particles[i].pos.x, particles[i].pos.y);
+                spatial_grid[cell_index].push_back(i);
+            }
+        }
+
+        std::tuple<int, int> index_to_RowCol(int index){
+            int row = index / ncells;
+            int col = index % ncells;
+            return std::make_tuple(row, col);
+        }
+
+        int rowCol_to_index(int row, int col){
+            if (row < 0) {
+                row += ncells;
+            }
+            else if (row >= ncells){
+                row -= ncells;
+            }
+            if (col < 0){
+                col += ncells;
+            }
+            else if (row >= ncells) {
+                col -= ncells;
+            } 
+            return row * ncells + col;
+        }
+
+        void set_nneighbour_zero(){
+            for (int i = 0; i<nparticles; i++){
+                    std::fill(nneighbour[i], nneighbour[i] + nparticles, false);
+                }
+        }
+
+        void assignCalcArray(){
+            int row;
+            int col;
+            int jcell;
+            set_nneighbour_zero();
+            for (int icell = 0; icell < ncells*ncells; icell++){
+                int offsets[9][2] = {
+                    {-1, -1},
+                    {-1, 0},
+                    {-1, 1},
+                    {0, -1},
+                    {0, 0},
+                    {0, 1},
+                    {1, -1},
+                    {1, 0},
+                    {1, 1}
+                };
+
+                // within cell
+                for (int i = 0; i<9; i++){
+                    std::tie(row, col) = index_to_RowCol(icell);
+                    //std::cout <<row<<' '<<col<<'\n';;
+                    row += offsets[i][0];
+                    col += offsets[i][1];
+                    //std::cout <<row<<' '<<col<<'\n';;
+                    jcell = rowCol_to_index(row, col);
+                    //std::cout << jcell << '\n';
+                    for (int particle_i : spatial_grid[icell]){
+                        for (int particle_j : spatial_grid[jcell]){
+                            //std::cout << "Particle_i: " << particle_i << "   Particle_j: " << particle_j << '\n';
+                            nneighbour[particle_i][particle_j] = true;
+                        }
+                    }
+                }
+            }
+            spatial_grid.clear();
+        }
+        
+
         ~Environment(){
             for (int i = 0; i < nparticles; i++){
                 delete[] distances[i];
             }
+            for (int i = 0; i< ncells; i++){
+                delete[] nneighbour[i];
+            }
+            delete[] nneighbour;
             delete[] distances;
             delete[] particles;
             delete[] forces;

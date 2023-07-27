@@ -49,6 +49,7 @@ class GradientDescent {
 
     void steepest_descent(double step_size, int maxsteps, double tol){
         double dE = 1000;
+        tol = tol * env->nparticles;
         int n = 0;
         while ((dE > tol) | (n >= maxsteps)){
             dE = env->calcPotEnergy();
@@ -59,7 +60,7 @@ class GradientDescent {
             }
             dE = std::abs(dE - env->calcPotEnergy());
 
-            printf("delta E: %.5lf ==== System Energy: %.5lf\n", dE, env->calcPotEnergy());
+            printf("delta E: %.5lf ==== System Energy: %.5lf\n", dE/env->nparticles, env->calcPotEnergy()/env->nparticles);
             n += 1;
 
         }
