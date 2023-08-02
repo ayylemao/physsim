@@ -185,6 +185,8 @@ class Environment {
                 for (int j = i; j < nparticles; j++){
                     if (i != j){
                         if (nneighbour[i][j] == true){
+                            nneighbour[i][j] = false;
+                            nneighbour[j][i] = false;
                             dist_vec = calc_PBC_dist(particles[i].pos, particles[j].pos);
                             dist = dist_vec.magnitude();
                             inv_norm = 1.0f / dist;
@@ -285,42 +287,32 @@ class Environment {
             return row * ncells + col;
         }
 
-        void set_nneighbour_zero(){
-            for (int i = 0; i<nparticles; i++){
-                    std::fill(nneighbour[i], nneighbour[i] + nparticles, false);
-                }
-        }
-
         void assignCalcArray(){
             int row;
             int col;
             int jcell;
-            set_nneighbour_zero();
+            int offsets[9][2] = {
+                {-1, -1},
+                {-1, 0},
+                {-1, 1},
+                {0, -1},
+                {0, 0},
+                {0, 1},
+                {1, -1},
+                {1, 0},
+                {1, 1}
+            };
             for (int icell = 0; icell < ncells*ncells; icell++){
-                int offsets[9][2] = {
-                    {-1, -1},
-                    {-1, 0},
-                    {-1, 1},
-                    {0, -1},
-                    {0, 0},
-                    {0, 1},
-                    {1, -1},
-                    {1, 0},
-                    {1, 1}
-                };
+
 
                 // within cell
                 for (int i = 0; i<9; i++){
                     std::tie(row, col) = index_to_RowCol(icell);
-                    //std::cout <<row<<' '<<col<<'\n';;
                     row += offsets[i][0];
                     col += offsets[i][1];
-                    //std::cout <<row<<' '<<col<<'\n';;
                     jcell = rowCol_to_index(row, col);
-                    //std::cout << jcell << '\n';
                     for (int particle_i : spatial_grid[icell]){
                         for (int particle_j : spatial_grid[jcell]){
-                            //std::cout << "Particle_i: " << particle_i << "   Particle_j: " << particle_j << '\n';
                             nneighbour[particle_i][particle_j] = true;
                         }
                     }

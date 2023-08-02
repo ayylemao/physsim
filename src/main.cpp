@@ -35,23 +35,24 @@ void drawParticles(sf::RenderWindow& window, const Environment *env, double CIRC
 
 int main(){
     double duration_sum = 0;
-    int frame_count = 0;
+    double frame_count = 0;
     std::chrono::_V2::system_clock::time_point start;
     std::chrono::_V2::system_clock::time_point stop;
-    int nparticles = 1000;
+    int nparticles = 400;
     double boxsize = 500;
     double dt = 0.0005;
     double CIRCLE_RADIUS = 3.0;
     double VEL_SCALE = 1;
-    double LJ_CUTOFF = 100;
+    double LJ_CUTOFF = 15;
 
     auto env = Environment(nparticles, boxsize, dt, LJ_CUTOFF);
     for (int i = 0; i < nparticles; i++){
         env.particles[i].setParams(2, 5, 1);
     }
-    env.initialize_particles(VEL_SCALE);
-    GradientDescent opt = GradientDescent(&env, 0.01);
-    opt.steepest_descent(0.001, 1000, 0.05);
+    //env.initialize_particles(VEL_SCALE);
+    //GradientDescent opt = GradientDescent(&env, 0.01);
+    //opt.steepest_descent(0.001, 1000, 0.05);
+    env.init_pos_uniform();
     
 
 
@@ -78,7 +79,7 @@ int main(){
         stop = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
         duration_sum += duration.count();
-        frame_count += 1;
+        frame_count += 1.0;
         if (frame_count > 99){
             std::cout << duration_sum/frame_count << '\n';
             frame_count = 0;
