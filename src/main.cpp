@@ -43,13 +43,13 @@ int main(){
     double dt = 0.0005;
     double CIRCLE_RADIUS = 3.0;
     double VEL_SCALE = 1;
-    double LJ_CUTOFF = 15;
+    double LJ_CUTOFF = 50;
 
     auto env = Environment(nparticles, boxsize, dt, LJ_CUTOFF);
     for (int i = 0; i < nparticles; i++){
         env.particles[i].setParams(2, 5, 1);
     }
-    //env.initialize_particles(VEL_SCALE);
+    env.initialize_particles(VEL_SCALE);
     //GradientDescent opt = GradientDescent(&env, 0.01);
     //opt.steepest_descent(0.001, 1000, 0.05);
     env.init_pos_uniform();
@@ -67,12 +67,11 @@ int main(){
                 window.close();
         }
         start = std::chrono::high_resolution_clock::now();
-        env.assing_cells();
-        env.assignCalcArray();
+        //env.assing_cells();
+        //env.assignCalcArray();
 
         env.integrateVerlet();
         env.enforcePBC();
-
         window.clear(); 
         drawParticles(window, &env, CIRCLE_RADIUS);
         window.display();

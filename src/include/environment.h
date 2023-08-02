@@ -176,31 +176,51 @@ class Environment {
         }
 
         void calcForces(){
+            int row;
+            int col;
+            int jcell;
             double inv_norm;
             double ind_force;
             auto dist_vec = Vector2d();
             double dist;
+            int offsets[9][2] = {
+                {-1, -1},
+                {-1, 0},
+                {-1, 1},
+                {0, -1},
+                {0, 0},
+                {0, 1},
+                {1, -1},
+                {1, 0},
+                {1, 1}
+            };
+            assing_cells();
             std::fill(forces, forces + nparticles, Vector2d(0, 0));
-            for (int i = 0; i < nparticles; i++){
-                for (int j = i; j < nparticles; j++){
-                    if (i != j){
-                        if (nneighbour[i][j] == true){
-                            nneighbour[i][j] = false;
-                            nneighbour[j][i] = false;
-                            dist_vec = calc_PBC_dist(particles[i].pos, particles[j].pos);
-                            dist = dist_vec.magnitude();
-                            inv_norm = 1.0f / dist;
-                            ind_force = utils::ljFor(particles[i].eps, particles[i].sig, dist);
-                            dist_vec *= inv_norm;
-                            dist_vec *= ind_force;
-                            forces[i] += dist_vec;
-                            dist_vec *= -1;
-                            forces[j] += dist_vec;
+            for (int icell = 0; icell < ncells*ncells; icell++){
+                for (int i = 0; i<9; i++){
+                    std::tie(row, col) = index_to_RowCol(icell);
+                    row += offsets[i][0];
+                    col += offsets[i][1];
+                    jcell = rowCol_to_index(row, col);
+                    for (int particle_i : spatial_grid[icell]){
+                        for (int particle_j : spatial_grid[jcell]){
+                            if (particle_i != particle_j){
+                                dist_vec = calc_PBC_dist(particles[particle_i].pos, particles[particle_j].pos);
+                                dist = dist_vec.magnitude();
+                                inv_norm = 1.0f / dist;
+                                ind_force = utils::ljFor(particles[particle_i].eps, particles[particle_i].sig, dist);
+                                dist_vec *= inv_norm;
+                                dist_vec *= ind_force;
+                                forces[particle_i] += dist_vec;
+                            }
                         }
                     }
                 }
             }
-        }        
+            spatial_grid.clear();
+        }
+
+
 
         void calcEnergy(){
             energy = 0;
