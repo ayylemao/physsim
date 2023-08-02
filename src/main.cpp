@@ -38,7 +38,7 @@ int main(){
     int frame_count = 0;
     std::chrono::_V2::system_clock::time_point start;
     std::chrono::_V2::system_clock::time_point stop;
-    int nparticles = 500;
+    int nparticles = 1000;
     double boxsize = 500;
     double dt = 0.0005;
     double CIRCLE_RADIUS = 3.0;
@@ -53,16 +53,7 @@ int main(){
     GradientDescent opt = GradientDescent(&env, 0.01);
     opt.steepest_descent(0.001, 1000, 0.05);
     
-//    for (int i: env.spatial_grid[0]){
-//        std::cout << i << '\n';
-//    }
-//
-//    for (int i = 0; i < env.nparticles; i++){
-//        for (int j = 0; j<env.nparticles; j++){
-//            std::cout << env.nneighbour[i][j] << ' ';
-//        }
-//        std::cout << '\n';
-//    }
+
 
 
     sf::RenderWindow window(sf::VideoMode(boxsize, boxsize), "LJ SIM");
